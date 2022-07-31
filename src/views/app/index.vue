@@ -1,104 +1,62 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, Ref, ref } from 'vue';
 
 import { invoke } from '@tauri-apps/api'
+import LoadingComponent from '../../@core/components/Sidebar/Loading/LoadingComponent.vue'
+import JsonViewer from 'vue-json-viewer'
 
-onMounted(() => {
-  invoke('greet', { name: 'World' })
-  .then((response) => console.log(response))
-})
+const response: Record<string, any> = ref(null);
+const url: Ref<string> = ref('');
+const isLoading: Ref<boolean> = ref(false);
+
+async function request() {
+  if(url.value !== '') {
+    isLoading.value = true;
+    await invoke("greet", {
+      request: {
+        url: url.value,
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        bodyType: 'json',
+        body: ''
+      }
+    })
+    .then(res => {
+      response.value = res;
+      isLoading.value = false;
+    })
+    .catch(err => {
+      response.value = err;
+      isLoading.value = false;
+    });
+  }
+}
 
 
 </script>
 
 <template>
-<div class="max-w-screen-xl px-4 py-16 mx-auto sm:px-6 lg:px-8">
-  <div class="max-w-lg mx-auto text-center">
-    <h1 class="text-2xl font-bold sm:text-3xl">Get started today!</h1>
-
-    <p class="mt-4 text-gray-500">
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Et libero nulla
-      eaque error neque ipsa culpa autem, at itaque nostrum!
-    </p>
+<div class="w-full container mx-auto">
+  <div class="flex items-center mt-24">
+    <input v-model="url" class="mr-4 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Type your url">
+    <button type="button" @click="request" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+      <span v-if="!isLoading">Send</span>
+      <LoadingComponent v-else />
+    </button>
   </div>
-
-  <form action="" class="max-w-md mx-auto mt-8 mb-0 space-y-4">
-    <div>
-      <label for="email" class="sr-only">Email</label>
-
-      <div class="relative">
-        <input
-          type="email"
-          class="w-full p-4 pr-12 text-sm border-gray-200 rounded-lg shadow-sm"
-          placeholder="Enter email"
-        />
-
-        <span class="absolute inset-y-0 inline-flex items-center right-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-            />
-          </svg>
-        </span>
-      </div>
-    </div>
-
-    <div>
-      <label for="password" class="sr-only">Password</label>
-      <div class="relative">
-        <input
-          type="password"
-          class="w-full p-4 pr-12 text-sm border-gray-200 rounded-lg shadow-sm"
-          placeholder="Enter password"
-        />
-
-        <span class="absolute inset-y-0 inline-flex items-center right-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-            />
-          </svg>
-        </span>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between">
-      <p class="text-sm text-gray-500">
-        No account?
-        <a class="underline" href="">Sign up</a>
-      </p>
-
-      <button
-        type="submit"
-        class="inline-block px-5 py-3 ml-3 text-sm font-medium text-white bg-blue-500 rounded-lg"
-      >
-        Sign in
-      </button>
-    </div>
-  </form>
+  <div class="mt-4" v-if="response && !isLoading">
+    <h4>Response</h4>
+    <json-viewer
+      :value="response"
+      :expand-depth=5
+      copyable
+      boxed
+      sort></json-viewer>
+  </div>
+  <div v-if="isLoading">
+    <LoadingComponent />
+  </div>
 </div>
 </template>

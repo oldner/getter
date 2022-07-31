@@ -1,5 +1,5 @@
 {
-  "name": "reqman",
+  "name": "getter",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,6 +13,7 @@
     "@tailwindcss/forms": "^0.5.2",
     "@tauri-apps/api": "^1.0.2",
     "vue": "^3.2.37",
+    "vue-json-viewer": "^3.0.4",
     "vue-router": "^4.1.2"
   },
   "devDependencies": {
