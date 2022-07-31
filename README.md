@@ -1,3 +1,15 @@
-# ReqMan
+# Getter
 
-ReqMan is a tool written with Vue and Rust (Tauri) for back-end developers to create HTTP requests.
+Getter is a tool written with Vue and Rust (Tauri) for create HTTP requests.
+
+## Features
+
+- GET
+
+## RoadMap
+
+- POST
+- PUT
+- DELETE
+- PATCH
+- UI Improvements
